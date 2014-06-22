@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+
+	<style type="text/css">
+	html, body{
+		width:30%; 
+		width:30%; 
+		margin:0; 
+		padding:0;
+	}
+
+	#field {
+		width:30%; 
+		height:30%;
+	}
+	.one, .two, .three, .four, .five,
+	 .six, .seven, .eight, .nine{ 
+		border:1px solid #000;
+		padding-bottom: 30%; 
+		height: 0;
+		width:30%; 
+		margin:1%; 
+		float:left; 
+		display:block;
+		text-align: center;		
+	}
+	</style>
+</head>
+<body>
+<div class="field">
+	<div class="one">1</div>
+	<div class="two">2</div>
+	<div class="three">3</div>
+	<div class="four">4</div>
+	<div class="five">5</div>
+	<div class="six">6</div>
+	<div class="seven">7</div>
+	<div class="eight">8</div>
+	<div class="nine">9</div>
+</div>
+
+<script src="http://vm-4.martynovr.koding.kd.io:3000/socket.io/socket.io.js"> </script>
+<script type="text/javascript">
+	(function() {
+		console.log('Started...');
+
+		var pMark = '*';
+
+		getNode = function(s) {
+			return document.querySelector(s);
+		};
+		setStatus = function(s) {
+			console.log(s);
+			var x = getNode('.' + s.fieldName);
+			x.textContent = s.pMark;
+		};
+
+		try {
+			var socket = io.connect('http://vm-4.martynovr.koding.kd.io:3000');
+		} catch (e) {
+			// Set status to warn user
+		}
+
+		if (socket !== undefined) {
+			console.log('socket is defined');
+
+			socket.on('status', function(data) {
+				console.log('status: ' + data);
+				setStatus(data);
+			});
+
+			socket.on('playerMark', function(data) {
+				console.log('playerMark: ' + data);
+				pMark = data;
+				console.log("Player mark is: " + data);
+			});
+		};
+
+
+		var field = getNode('.field');
+		field.addEventListener('click', function(e) {
+			evt = e || window.event;
+			console.log(evt.toElement.className);
+
+			socket.emit('turn', {
+				pMark : pMark,
+				fieldName : evt.toElement.className
+			});
+		});
+
+	})();
+
+
+</script>
+
+</body>
+</html>
