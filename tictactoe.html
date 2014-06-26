@@ -48,13 +48,32 @@
 
 		var pMark = '*';
 
-		getNode = function(s) {
+		getNode = function (s) {
 			return document.querySelector(s);
 		};
-		setStatus = function(s) {
+		getFields = function () {
+			var arr = [];
+			arr.push(getNode('.one'));
+			arr.push(getNode('.two'));
+			arr.push(getNode('.three'));
+			arr.push(getNode('.four'));
+			arr.push(getNode('.five'));
+			arr.push(getNode('.six'));
+			arr.push(getNode('.seven'));
+			arr.push(getNode('.eight'));
+			arr.push(getNode('.nine'));
+			return arr;
+		};
+
+		var fieldz = getFields();
+
+		setStatus = function (s) {
 			console.log(s);
-			var x = getNode('.' + s.fieldName);
-			x.textContent = s.pMark;
+			console.log(fieldz);
+			for (var i = 0; i < fieldz.length; i++) {
+				fieldz[i].textContent = s.charAt(i);
+				console.log(s.charAt(i));
+			}
 		};
 
 		try {
@@ -67,7 +86,7 @@
 			console.log('socket is defined');
 
 			socket.on('status', function(data) {
-				console.log('status: ' + data);
+				//console.log('status: ' + data);
 				setStatus(data);
 			});
 

@@ -1,46 +1,98 @@
 var io = require('socket.io');
 
-var player1Mark = 'X';
-var player2Mark = 'O';
+// tictactoe game class
+function Game () {
+  this.player1Mark = 'X',
+  this.player2Mark = 'O',
+  this.whoseTurn = 'X',
+  this.gameState = [2,2,2,2,2,2,2,2,2];
+}
 
-var whoseTurn = player1Mark;
+Game.prototype.getGameState = function () {
+  var str = '';
+  for (var i = 0; i < this.gameState.length; i++) {
+    str += this.gameState[i];
+  }
+  return str;
+};
 
-var players = [];
+Game.prototype.setGameState = function (str) { 
+  if (str.length != this.gameState.length) { return;}
+  for (var i = 0; i < this.gameState.length; i++) {
+    this.gameState[i] = parseInt(str.charAt(i), 10);
+  }
+};
+
+
+var getIndexFromField = function(s) {
+  switch(s) {
+    case 'one':
+        return 0;
+    case 'two':
+        return 1;
+    case 'three':
+        return 2;
+    case 'four':
+        return 3;
+    case 'five':
+        return 4;
+    case 'six':
+        return 5;
+    case 'seven':
+        return 6;
+    case 'eight':
+        return 7;
+    default:
+        return 8;
+  }
+};
 
 module.exports = function (server) {
-	var sockets = io.listen(server).sockets;
-	console.log('sockets initiated');	
+  var sockets = io.listen(server).sockets;
+  console.log('sockets initiated'); 
 
-	sockets.on('connection', function (socket) {
-		console.log('someone connected');
+  var game;
+  var players = [];
 
-		var player;
+  sockets.on('connection', function (socket) {
+    console.log('someone connected');
 
-		if (players.length === 0) {
-			player = player1Mark;
-		}
-		else if (players.length == 1) {
-			player = player2Mark;
-		}
+    var player;
 
-		players.push(player);
+    if (players.length === 0) {
+      game = new Game();
+      player = game.player1Mark;
+    }
+    else if (players.length == 1) {
+      player = game.player2Mark;
+    }
 
-		console.log(players);
-		socket.emit('playerMark', player);
+    players.push(player);
 
-		socket.on('turn', function(data) {
-			console.log(data);
+    console.log(players);
+    socket.emit('playerMark', player);
 
-			if (whoseTurn === data.pMark) {
-				sockets.emit('status', data);
-				whoseTurn = whoseTurn === player1Mark ? player2Mark : player1Mark;
-			}
-			
-		});
-		
+    socket.on('turn', function(data) {
+      console.log(data);
 
-		socket.on('disconnect', function () { 
-			console.log(player + ' disconnected');
-		});
-	});
+      if (game.whoseTurn === data.pMark) {        
+        game.gameState[getIndexFromField(data.fieldName)] = data.pMark === game.player1Mark ? 1:0;
+        game.whoseTurn = game.whoseTurn === game.player1Mark ? game.player2Mark : game.player1Mark;
+
+        sockets.emit('status', game.getGameState());
+        console.log(game.getGameState());
+      }
+      
+    });
+
+    socket.on('loadGame', function (data) {
+      game.setGameState(data);
+      sockets.emit('status', game.getGameState());
+    });
+    
+
+    socket.on('disconnect', function () { 
+      console.log(player + ' disconnected');
+    });
+  });
 };
