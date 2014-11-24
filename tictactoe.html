@@ -27,6 +27,30 @@
 		text-align: center;		
 	}
 	</style>
+	
+	<script src="https://cdn.pubnub.com/pubnub.min.js"></script>
+	 
+	<!-- Instantiate PubNub -->
+	<script type="text/javascript">
+
+	  var PUBNUB_demo = PUBNUB.init({
+	    publish_key: 'pub-c-0e75fdb6-796c-4365-86e3-93e9fa4d4797',
+	    subscribe_key: 'sub-c-1e21f940-73d7-11e4-ac4b-02ee2ddab7fe'
+	  });
+
+	  //Subscribe to the demo_tutorial channel
+		PUBNUB_demo.subscribe({
+		  channel: 'my_channel',
+		  message: function(m){console.log(m)}
+		});
+		
+		// Publish a simple message to the demo_tutorial channel
+        PUBNUB_demo.publish({
+            channel: 'connection',
+            message: {"text":"Someone connected!"}
+         });
+        	  
+	</script>
 </head>
 <body>
 <div class="field">
@@ -41,7 +65,6 @@
 	<div class="nine">9</div>
 </div>
 
-<script src="http://vm-4.martynovr.koding.kd.io:3000/socket.io/socket.io.js"> </script>
 <script type="text/javascript">
 	(function() {
 		console.log('Started...');
@@ -76,16 +99,11 @@
 			}
 		};
 
-		try {
-			var socket = io.connect('http://vm-4.martynovr.koding.kd.io:3000');
-		} catch (e) {
-			// Set status to warn user
-		}
 
-		if (socket !== undefined) {
-			console.log('socket is defined');
+		if (PUBNUB_demo !== undefined) {
+			console.log('PUBNUB_demo is defined');
 
-			socket.on('status', function(data) {
+			/*socket.on('status', function(data) {
 				//console.log('status: ' + data);
 				setStatus(data);
 			});
@@ -94,7 +112,7 @@
 				console.log('playerMark: ' + data);
 				pMark = data;
 				console.log("Player mark is: " + data);
-			});
+			});*/
 		};
 
 
@@ -103,12 +121,13 @@
 			evt = e || window.event;
 			console.log(evt.toElement.className);
 
-			socket.emit('turn', {
+            PUBNUB_demo.publish({
+                channel: 'turn',
+                message: {
 				pMark : pMark,
 				fieldName : evt.toElement.className
-			});
+            }});
 		});
-
 	})();
 
 

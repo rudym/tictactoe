@@ -1,4 +1,10 @@
-var io = require('socket.io');
+var pubnub = require("pubnub")({
+    ssl           : true,  // <- enable TLS Tunneling over TCP
+    publish_key   : "pub-c-0e75fdb6-796c-4365-86e3-93e9fa4d4797",
+    subscribe_key : "sub-c-1e21f940-73d7-11e4-ac4b-02ee2ddab7fe"
+});
+
+
 
 // tictactoe game class
 function Game () {
@@ -48,14 +54,13 @@ var getIndexFromField = function(s) {
 };
 
 module.exports = function (server) {
-  var sockets = io.listen(server).sockets;
-  console.log('sockets initiated'); 
-
   var game;
   var players = [];
 
-  sockets.on('connection', function (socket) {
-    console.log('someone connected');
+  pubnub.subscribe({
+    channel  : "connection",
+    callback : function(message) {
+    console.log(message, ' connected');
 
     var player;
 
@@ -70,29 +75,35 @@ module.exports = function (server) {
     players.push(player);
 
     console.log(players);
-    socket.emit('playerMark', player);
+    //socket.emit('playerMark', player);
 
-    socket.on('turn', function(data) {
+    pubnub.subscribe({
+    channel  : "turn",
+    callback : function(data) {
       console.log(data);
 
-      if (game.whoseTurn === data.pMark) {        
+      if (game.whoseTurn === data.pMark) {
         game.gameState[getIndexFromField(data.fieldName)] = data.pMark === game.player1Mark ? 1:0;
         game.whoseTurn = game.whoseTurn === game.player1Mark ? game.player2Mark : game.player1Mark;
 
-        sockets.emit('status', game.getGameState());
+        //sockets.emit('status', game.getGameState());
         console.log(game.getGameState());
       }
-      
-    });
 
-    socket.on('loadGame', function (data) {
+    }});
+
+    pubnub.subscribe({
+    channel  : "loadGame",
+    callback : function(data) {
       game.setGameState(data);
-      sockets.emit('status', game.getGameState());
-    });
-    
+      //sockets.emit('status', game.getGameState());
+    }});
 
-    socket.on('disconnect', function () { 
+
+    pubnub.subscribe({
+    channel  : "disconnect",
+    callback : function() { 
       console.log(player + ' disconnected');
-    });
-  });
+    }});
+  }});
 };
