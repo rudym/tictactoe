@@ -10,7 +10,6 @@
 		margin:0; 
 		padding:0;
 	}
-
 	#field {
 		width:30%; 
 		height:30%;
@@ -27,30 +26,6 @@
 		text-align: center;		
 	}
 	</style>
-	
-	<script src="https://cdn.pubnub.com/pubnub.min.js"></script>
-	 
-	<!-- Instantiate PubNub -->
-	<script type="text/javascript">
-
-	  var PUBNUB_demo = PUBNUB.init({
-	    publish_key: 'pub-c-0e75fdb6-796c-4365-86e3-93e9fa4d4797',
-	    subscribe_key: 'sub-c-1e21f940-73d7-11e4-ac4b-02ee2ddab7fe'
-	  });
-
-	  //Subscribe to the demo_tutorial channel
-		PUBNUB_demo.subscribe({
-		  channel: 'my_channel',
-		  message: function(m){console.log(m)}
-		});
-		
-		// Publish a simple message to the demo_tutorial channel
-        PUBNUB_demo.publish({
-            channel: 'connection',
-            message: {"text":"Someone connected!"}
-         });
-        	  
-	</script>
 </head>
 <body>
 <div class="field">
@@ -65,12 +40,14 @@
 	<div class="nine">9</div>
 </div>
 
+<script src="http://umkk7a143dbd.martynovr.koding.io:3000/socket.io/socket.io.js"> </script>
 <script type="text/javascript">
+var socket = io.connect('http://umkk7a143dbd.martynovr.koding.io:3000');
+socket.emit("new player", {x: 0, y: 0});
+
 	(function() {
 		console.log('Started...');
-
 		var pMark = '*';
-
 		getNode = function (s) {
 			return document.querySelector(s);
 		};
@@ -87,9 +64,7 @@
 			arr.push(getNode('.nine'));
 			return arr;
 		};
-
 		var fieldz = getFields();
-
 		setStatus = function (s) {
 			console.log(s);
 			console.log(fieldz);
@@ -98,39 +73,30 @@
 				console.log(s.charAt(i));
 			}
 		};
-
-
-		if (PUBNUB_demo !== undefined) {
-			console.log('PUBNUB_demo is defined');
-
-			/*socket.on('status', function(data) {
+		try {
+			//var socket = io.connect('http://umkk7a143dbd.martynovr.koding.io:3000');
+		} catch (e) {
+			// Set status to warn user
+		}
+		if (socket !== undefined) {
+			console.log('socket is defined');
+			socket.on('gameState', function(data) {
 				//console.log('status: ' + data);
 				setStatus(data);
 			});
-
-			socket.on('playerMark', function(data) {
-				console.log('playerMark: ' + data);
-				pMark = data;
-				console.log("Player mark is: " + data);
-			});*/
+			socket.on('new player', function(data) {
+				console.log('New player id is: ' + data.id);
+			});
 		};
-
-
 		var field = getNode('.field');
 		field.addEventListener('click', function(e) {
 			evt = e || window.event;
 			console.log(evt.toElement.className);
-
-            PUBNUB_demo.publish({
-                channel: 'turn',
-                message: {
-				pMark : pMark,
-				fieldName : evt.toElement.className
-            }});
+			socket.emit('move player', {
+				index : evt.toElement.className
+			});
 		});
 	})();
-
-
 </script>
 
 </body>
