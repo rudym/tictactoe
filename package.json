@@ -1,11 +1,16 @@
 {
-  "name": "tictactoe",
+  "name": "tictacoe",
   "version": "0.0.0",
-  "description": "",
-  "main": "servapp.js",
+  "description": "Simple tictactoe node.js with communication layer game",
+  "main": "game.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC"
+  "author": "Rodion Martynov",
+  "license": "ISC",
+  "dependencies": {
+    "socket.io": "^1.2.1",
+    "http-server": "^0.7.3",
+    "util": "^0.10.3"
+  }
 }
