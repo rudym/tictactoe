@@ -2,7 +2,7 @@
 ** NODE.JS REQUIREMENTS
 **************************************************/
 var util = require("util"),					// Utility resources (logging, object inspection, etc)
-	io = require("socket.io"),				// Socket.IO
+	//io = require("socket.io"),				// Socket.IO
 	Player = require("./Player").Player,		// Player class
 	tttBoard = require('./tictactoeboard.js');	// TicacToe board class
 
@@ -15,28 +15,7 @@ var socket,		// Socket controller
 	tttGame;
 
 
-/**************************************************
-** GAME INITIALISATION
-**************************************************/
-function init() {
-	// Create an empty array to store players
-	players = [];
 
-	// Set up Socket.IO to listen on port 8000
-	socket = io.listen(3000);
-
-	/* Configure Socket.IO
-	socket.configure(function() {
-		// Only use WebSockets
-		socket.set("transports", ["websocket"]);
-
-		// Restrict log output
-		socket.set("log level", 2);
-	});*/
-
-	// Start listening for events
-	setEventHandlers();
-}
 
 
 /**************************************************
@@ -146,4 +125,27 @@ function playerById(id) {
 /**************************************************
 ** RUN THE GAME
 **************************************************/
-init();
+//init();
+
+/**************************************************
+** GAME INITIALISATION
+**************************************************/
+module.exports = function init(io) {
+	// Create an empty array to store players
+	players = [];
+
+	// Set up Socket.IO to listen on port 8000
+	socket = io;
+
+	/* Configure Socket.IO
+	socket.configure(function() {
+		// Only use WebSockets
+		socket.set("transports", ["websocket"]);
+
+		// Restrict log output
+		socket.set("log level", 2);
+	});*/
+
+	// Start listening for events
+	setEventHandlers();
+}
